@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoadTime Overlay — Optionen</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <h1>LoadTime Overlay</h1>
+    <p>Schwellen und Farben für die Overlay-Leisten. Ungültige Werte werden verworfen.</p>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>Schwellen in Millisekunden</legend>
+        <label>
+          Grün unter
+          <input id="greenMaxMs" name="greenMaxMs" type="number" min="0" max="600000" step="1" required>
+          ms
+        </label>
+        <label>
+          Gelb unter
+          <input id="yellowMaxMs" name="yellowMaxMs" type="number" min="0" max="600000" step="1" required>
+          ms
+        </label>
+        <p class="hint">Rot gilt ab der gelben Schwelle (Standard: 300 / 500).</p>
+      </fieldset>
+      <fieldset>
+        <legend>Farben</legend>
+        <label>Grün <input id="colorGreen" name="colorGreen" type="color"></label>
+        <label>Gelb <input id="colorYellow" name="colorYellow" type="color"></label>
+        <label>Rot <input id="colorRed" name="colorRed" type="color"></label>
+      </fieldset>
+      <p id="error" class="error" hidden></p>
+      <p id="status" class="status" hidden></p>
+      <button type="submit">Speichern</button>
+    </form>
+  </main>
+  <script src="../lib/settings.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

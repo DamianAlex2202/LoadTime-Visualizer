@@ -1,0 +1,10 @@
+{
+  "name": "loadtime-overlay",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Chrome extension overlay for per-element load times",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "demo": "node demo/server.mjs"
+  }
+}

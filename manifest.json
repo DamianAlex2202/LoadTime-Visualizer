@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "LoadTime Overlay",
+  "version": "1.0.0",
+  "description": "Zeigt Ladezeiten einzelner Elemente als Overlay an (HTML, JavaScript, Datastar).",
+  "permissions": ["storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options/options.html",
+  "commands": {
+    "toggle-overlay": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "LoadTime-Overlay ein- oder ausschalten"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+        "lib/color.js",
+        "lib/label.js",
+        "lib/timing.js",
+        "lib/settings.js",
+        "content/measure.js",
+        "content/overlay.js",
+        "content/index.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}

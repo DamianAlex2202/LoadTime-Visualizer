@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoadTime Demo</title>
+  <link rel="stylesheet" href="/demo.css">
+  <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.3/bundles/datastar.js"></script>
+</head>
+<body>
+  <main id="main">
+    <h1>LoadTime Overlay Demo</h1>
+    <p>Extension laden, dann <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd>. Erwartet: langsames Bild rot, JS-Block gelb/grün, Datastar-Warenkorb gelb.</p>
+
+    <img class="hero" src="/slow.svg" width="640" height="140" alt="Langsames Demo-Bild">
+
+    <div class="row">
+      <article class="card prose">
+        <h2>Statisches HTML</h2>
+        <p>Dieser Block kommt mit dem ersten HTML. Die Leiste sollte eher grün sein.</p>
+      </article>
+
+      <section class="card">
+        <h2>JavaScript</h2>
+        <button id="js-load" type="button">Element nach 280ms einfügen</button>
+        <div id="js-target"></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Datastar</h2>
+      <p>Echtes <code>@get('/cart')</code> (Server wartet 420ms) oder Simulation der <code>datastar-fetch</code>-Events.</p>
+      <button type="button" data-on:click="@get('/cart')">Warenkorb laden (@get)</button>
+      <button id="ds-sim" type="button">Datastar-Events simulieren</button>
+      <div id="cart" class="card" style="margin-top:12px;min-height:72px">Warenkorb ist leer.</div>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('js-load').addEventListener('click', () => {
+      const box = document.createElement('div');
+      box.id = 'js-panel';
+      box.className = 'card';
+      box.textContent = 'Per JavaScript eingefügt.';
+      window.setTimeout(() => {
+        document.getElementById('js-target').appendChild(box);
+      }, 280);
+    });
+
+    document.getElementById('ds-sim').addEventListener('click', () => {
+      const btn = document.getElementById('ds-sim');
+      btn.dispatchEvent(new CustomEvent('datastar-fetch', { bubbles: true, composed: true, detail: { type: 'started' } }));
+      window.setTimeout(() => {
+        const cart = document.getElementById('cart');
+        cart.innerHTML = '<strong>Warenkorb</strong><p>2 Artikel · simuliert</p>';
+        btn.dispatchEvent(new CustomEvent('datastar-fetch', { bubbles: true, composed: true, detail: { type: 'finished' } }));
+      }, 410);
+    });
+  </script>
+</body>
+</html>
