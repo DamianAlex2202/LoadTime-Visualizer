@@ -1,12 +1,14 @@
 'use strict';
 
-chrome.commands.onCommand.addListener(async (command) => {
-  if (command !== 'toggle-overlay') return;
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab || tab.id == null) return;
-  try {
-    await chrome.tabs.sendMessage(tab.id, { type: 'LOADTIME_TOGGLE' });
-  } catch (err) {
-    // chrome:// and other pages without the content script
-  }
-});
+if (typeof importScripts === 'function' && !(globalThis.LoadTime && globalThis.LoadTime.sendToggleToActiveTab)) {
+  importScripts('lib/browser.js');
+}
+
+const LT = globalThis.LoadTime;
+const ext = LT.getExtensionApi(globalThis);
+if (ext && ext.commands && ext.commands.onCommand) {
+  ext.commands.onCommand.addListener(async (command) => {
+    if (command !== 'toggle-overlay') return;
+    await LT.sendToggleToActiveTab(ext);
+  });
+}

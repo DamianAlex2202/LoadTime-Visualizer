@@ -1,5 +1,8 @@
 node_modules/
 .superpowers/
+dist/
+test-results/
+playwright-report/
 *.log
 .DS_Store
 Thumbs.db

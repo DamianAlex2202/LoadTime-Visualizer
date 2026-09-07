@@ -2,9 +2,18 @@
   "name": "loadtime-overlay",
   "private": true,
   "version": "1.0.0",
-  "description": "Chrome extension overlay for per-element load times",
+  "description": "Chrome and Firefox extension overlay for per-element load times",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "demo": "node demo/server.mjs"
+    "test:unit": "node --test test/*.test.js",
+    "test:e2e": "node --test --test-timeout=180000 test/e2e/*.test.js",
+    "test:e2e:chrome": "node --test --test-timeout=180000 test/e2e/chrome.e2e.test.js test/e2e/demo-server.e2e.test.js",
+    "test:e2e:firefox": "node --test --test-timeout=180000 test/e2e/firefox.e2e.test.js test/e2e/demo-server.e2e.test.js",
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "demo": "node demo/server.mjs",
+    "pack": "node scripts/pack-extension.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
   }
 }

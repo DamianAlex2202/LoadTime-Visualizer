@@ -2,19 +2,7 @@
   'use strict';
 
   const LT = globalThis.LoadTime;
-  const HOST_ID = 'loadtime-overlay-host';
-  const SKIP_TAGS = {
-    SCRIPT: true,
-    STYLE: true,
-    LINK: true,
-    META: true,
-    HEAD: true,
-    NOSCRIPT: true,
-    TEMPLATE: true,
-    BR: true,
-    WBR: true,
-    HTML: true
-  };
+  const HOST_ID = LT.HOST_ID;
 
   const records = new WeakMap();
   const tracked = new Set();
@@ -24,10 +12,7 @@
   let started = false;
 
   function isSkippable(el) {
-    if (!el || el.nodeType !== 1) return true;
-    if (el.id === HOST_ID) return true;
-    if (SKIP_TAGS[el.tagName]) return true;
-    return false;
+    return LT.isSkippable(el);
   }
 
   function childSubtreeTimes(el) {
@@ -106,11 +91,10 @@
   }
 
   function appearMsAndSource() {
-    const now = performance.now();
-    if (inflightDatastar > 0 && datastarBatchStart > 0) {
-      return { ownMs: Math.max(0, now - datastarBatchStart), source: 'datastar' };
-    }
-    return { ownMs: now, source: 'dom' };
+    return LT.datastarAppear(performance.now(), {
+      inflight: inflightDatastar,
+      batchStart: datastarBatchStart
+    });
   }
 
   function handleAdded(node) {
@@ -128,33 +112,15 @@
   }
 
   function resourceDuration(entry) {
-    if (Number.isFinite(entry.duration) && entry.duration > 0) return entry.duration;
-    if (Number.isFinite(entry.responseEnd) && Number.isFinite(entry.startTime)) {
-      const delta = entry.responseEnd - entry.startTime;
-      if (delta > 0) return delta;
-    }
-    return 0;
+    return LT.resourceDuration(entry);
   }
 
   function urlsOf(el) {
-    const out = [];
-    const attrs = ['src', 'href', 'currentSrc'];
-    if (el.currentSrc) out.push(el.currentSrc);
-    if (el.src) out.push(el.src);
-    if (el.href) out.push(el.href);
-    for (let i = 0; i < attrs.length; i++) {
-      const v = el.getAttribute && el.getAttribute(attrs[i]);
-      if (v) out.push(v);
-    }
-    return out;
+    return LT.urlsOf(el);
   }
 
   function absUrl(value) {
-    try {
-      return new URL(String(value), location.href).href;
-    } catch (err) {
-      return '';
-    }
+    return LT.absoluteUrl(value, location.href);
   }
 
   function findElementsForResourceUrl(url) {
@@ -188,15 +154,15 @@
 
   function onDatastarFetch(evt) {
     const detail = evt.detail || {};
-    const type = detail.type;
+    const phase = LT.classifyDatastarFetch(detail).phase;
     const target = evt.target instanceof Element ? evt.target : document.documentElement;
-    if (type === 'started') {
+    if (phase === 'start') {
       inflightDatastar += 1;
       datastarBatchStart = performance.now();
       pendingDatastar.set(target, datastarBatchStart);
       return;
     }
-    if (type === 'finished' || type === 'error' || type === 'retries-failed') {
+    if (phase === 'end') {
       const start = pendingDatastar.get(target) || datastarBatchStart;
       const ms = Math.max(0, performance.now() - start);
       pendingDatastar.delete(target);

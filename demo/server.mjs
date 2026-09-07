@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const HOST = '127.0.0.1';
-const PORT = 4173;
+const PORT = Number(process.env.LOADTIME_DEMO_PORT || 4173);
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',

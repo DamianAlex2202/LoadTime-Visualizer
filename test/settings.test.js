@@ -24,6 +24,14 @@ describe('normalizeSettings', () => {
     assert.equal(out.yellowMaxMs, 800);
   });
 
+  it('reports invalid option form input without mutating defaults', () => {
+    const { validateOptionsInput } = require('../lib/settings.js');
+    assert.equal(validateOptionsInput(NaN, 500).error.includes('gültig'), true);
+    assert.equal(validateOptionsInput(800, 200).error.includes('kleiner'), true);
+    assert.equal(validateOptionsInput(-1, 500).error.includes('600000'), true);
+    assert.equal(validateOptionsInput(300, 500).error, undefined);
+  });
+
   it('clamps durations to 0..600000 and requires #RRGGBB colors', () => {
     const out = normalizeSettings({
       greenMaxMs: -10,

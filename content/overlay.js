@@ -89,7 +89,7 @@
     host.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;';
     const root = document.documentElement;
     if (root) root.appendChild(host);
-    shadow = host.attachShadow({ mode: 'closed' });
+    shadow = host.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = STYLE;
     toolbar = document.createElement('div');
@@ -198,6 +198,7 @@
       strip.style.width = Math.max(24, Math.round(rect.width)) + 'px';
       strip.style.zIndex = String(2147483000 + depthOf(el));
     });
+    if (host) host.setAttribute('data-loadtime-strips', String(seen.size));
     strips.forEach((strip, el) => {
       if (!seen.has(el)) {
         strip.remove();
@@ -224,13 +225,17 @@
     if (enabled) {
       ensureHost();
       host.style.display = 'block';
+      host.setAttribute('data-loadtime-enabled', 'true');
       window.addEventListener('scroll', onScrollOrResize, true);
       window.addEventListener('resize', onScrollOrResize, true);
       schedule();
     } else {
       window.removeEventListener('scroll', onScrollOrResize, true);
       window.removeEventListener('resize', onScrollOrResize, true);
-      if (host) host.style.display = 'none';
+      if (host) {
+        host.style.display = 'none';
+        host.setAttribute('data-loadtime-enabled', 'false');
+      }
       strips.forEach((strip) => strip.remove());
       strips.clear();
     }

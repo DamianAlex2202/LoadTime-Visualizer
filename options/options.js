@@ -2,6 +2,8 @@
   'use strict';
 
   const LT = globalThis.LoadTime;
+  const ext = LT.getExtensionApi(globalThis);
+  const area = LT.getStorageArea(ext);
   const form = document.getElementById('form');
   const errorEl = document.getElementById('error');
   const statusEl = document.getElementById('status');
@@ -29,15 +31,8 @@
   function readForm() {
     const greenMaxMs = Number(document.getElementById('greenMaxMs').value);
     const yellowMaxMs = Number(document.getElementById('yellowMaxMs').value);
-    if (!Number.isFinite(greenMaxMs) || !Number.isFinite(yellowMaxMs)) {
-      return { error: 'Bitte gültige Millisekunden eingeben.' };
-    }
-    if (greenMaxMs < 0 || yellowMaxMs < 0 || greenMaxMs > 600000 || yellowMaxMs > 600000) {
-      return { error: 'Schwellen müssen zwischen 0 und 600000 ms liegen.' };
-    }
-    if (greenMaxMs >= yellowMaxMs) {
-      return { error: 'Grün muss kleiner als Gelb sein.' };
-    }
+    const invalid = LT.validateOptionsInput(greenMaxMs, yellowMaxMs);
+    if (invalid.error) return invalid;
     const colors = {
       green: document.getElementById('colorGreen').value,
       yellow: document.getElementById('colorYellow').value,
@@ -48,14 +43,17 @@
     };
   }
 
-  chrome.storage.sync.get('loadtimeSettings', (data) => {
-    if (chrome.runtime.lastError) {
-      showError('Einstellungen konnten nicht gelesen werden.');
-      fill(LT.normalizeSettings(null));
-      return;
-    }
-    fill(LT.normalizeSettings(data && data.loadtimeSettings));
-  });
+  fill(LT.normalizeSettings(null));
+
+  if (area) {
+    LT.storageGet(area, 'loadtimeSettings')
+      .then((data) => {
+        fill(LT.normalizeSettings(data && data.loadtimeSettings));
+      })
+      .catch(() => {
+        showError('Einstellungen konnten nicht gelesen werden.');
+      });
+  }
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
@@ -64,13 +62,17 @@
       showError(result.error);
       return;
     }
-    chrome.storage.sync.set({ loadtimeSettings: result.settings }, () => {
-      if (chrome.runtime.lastError) {
+    if (!area) {
+      showError('Speichern fehlgeschlagen.');
+      return;
+    }
+    LT.storageSet(area, { loadtimeSettings: result.settings })
+      .then(() => {
+        fill(result.settings);
+        showStatus('Gespeichert.');
+      })
+      .catch(() => {
         showError('Speichern fehlgeschlagen.');
-        return;
-      }
-      fill(result.settings);
-      showStatus('Gespeichert.');
-    });
+      });
   });
 })();
