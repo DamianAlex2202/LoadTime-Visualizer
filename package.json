@@ -2,6 +2,7 @@
   "name": "loadtime-overlay",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Chrome and Firefox extension overlay for per-element load times",
   "scripts": {
     "test": "node --test test/*.test.js",

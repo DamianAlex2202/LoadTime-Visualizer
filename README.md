@@ -66,3 +66,7 @@ E2E lädt die Extension in Playwright-Chromium bzw. Playwright-Firefox, öffnet 
 - Kein `eval`, kein Debugger-API.
 - Optionen: Zahlen 0–600000, Grün < Gelb, Farben nur `#RRGGBB`. Storage: `sync` falls vorhanden, sonst `local`.
 - Demo-Server bindet ausschließlich `127.0.0.1` und liefert nur Dateien aus `demo/`.
+
+## Lizenz
+
+MIT License. Copyright © 2026 Damian Alexander. Siehe [LICENSE](LICENSE).
