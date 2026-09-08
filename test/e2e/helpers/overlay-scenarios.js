@@ -27,8 +27,8 @@ async function runOverlayScenarios(page, demoUrl) {
 
   const stripTexts = await page.locator('#loadtime-overlay-host .strip').allTextContents();
   assert.ok(
-    stripTexts.some((text) => text.includes('slow.svg') || /\d+ms/.test(text)),
-    'expected timing labels, got ' + JSON.stringify(stripTexts)
+    stripTexts.some((text) => text.includes('slow.svg') && text.includes('· net')),
+    'expected slow.svg net timing, got ' + JSON.stringify(stripTexts)
   );
 
   const stripsBefore = Number(await page.locator('#loadtime-overlay-host').getAttribute('data-loadtime-strips'));
@@ -44,7 +44,10 @@ async function runOverlayScenarios(page, demoUrl) {
   await page.waitForSelector('#js-panel', { timeout: 8000 });
   await page.waitForTimeout(400);
   const afterJs = await page.locator('#loadtime-overlay-host .strip').allTextContents();
-  assert.ok(afterJs.some((text) => text.includes('#js-panel') || text.includes('js-panel') || /\d+ms/.test(text)));
+  assert.ok(
+    afterJs.some((text) => text.includes('#js-panel') && text.includes('· dom')),
+    'expected #js-panel DOM timing, got ' + JSON.stringify(afterJs)
+  );
 
   await page.click('#ds-sim');
   await page.waitForFunction(() => (document.getElementById('cart') || {}).textContent.includes('simuliert'), null, {
@@ -52,7 +55,10 @@ async function runOverlayScenarios(page, demoUrl) {
   });
   await page.waitForTimeout(400);
   const afterDs = await page.locator('#loadtime-overlay-host .strip').allTextContents();
-  assert.ok(afterDs.some((text) => text.includes('#cart') || text.includes('#ds-sim') || /\d+ms/.test(text)));
+  assert.ok(
+    afterDs.some((text) => text.includes('· ds') && (text.includes('#ds-sim') || text.includes('#cart') || text.includes('strong'))),
+    'expected Datastar source tag, got ' + JSON.stringify(afterDs)
+  );
 
   await page.keyboard.press('Control+Shift+L');
   await page.waitForSelector('#loadtime-overlay-host[data-loadtime-enabled="false"]', {

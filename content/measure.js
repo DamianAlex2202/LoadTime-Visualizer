@@ -2,13 +2,13 @@
   'use strict';
 
   const LT = globalThis.LoadTime;
-  const HOST_ID = LT.HOST_ID;
 
   const records = new WeakMap();
   const tracked = new Set();
   const pendingDatastar = new WeakMap();
   let inflightDatastar = 0;
   let datastarBatchStart = 0;
+  let domBatchStart = 0;
   let started = false;
 
   function isSkippable(el) {
@@ -91,9 +91,18 @@
   }
 
   function appearMsAndSource() {
-    return LT.datastarAppear(performance.now(), {
+    const now = performance.now();
+    if (inflightDatastar === 0 && document.readyState !== 'loading' && !domBatchStart) {
+      domBatchStart = now;
+      queueMicrotask(() => {
+        domBatchStart = 0;
+      });
+    }
+    return LT.resolveAppear(now, {
       inflight: inflightDatastar,
-      batchStart: datastarBatchStart
+      batchStart: datastarBatchStart,
+      readyState: document.readyState,
+      domBatchStart: domBatchStart || now
     });
   }
 
@@ -157,9 +166,10 @@
     const phase = LT.classifyDatastarFetch(detail).phase;
     const target = evt.target instanceof Element ? evt.target : document.documentElement;
     if (phase === 'start') {
+      const startedAt = performance.now();
+      pendingDatastar.set(target, startedAt);
       inflightDatastar += 1;
-      datastarBatchStart = performance.now();
-      pendingDatastar.set(target, datastarBatchStart);
+      if (inflightDatastar === 1) datastarBatchStart = startedAt;
       return;
     }
     if (phase === 'end') {
@@ -167,6 +177,7 @@
       const ms = Math.max(0, performance.now() - start);
       pendingDatastar.delete(target);
       inflightDatastar = Math.max(0, inflightDatastar - 1);
+      if (inflightDatastar === 0) datastarBatchStart = 0;
       if (target && !isSkippable(target)) {
         setOwn(target, {
           ownMs: ms,
@@ -207,7 +218,6 @@
     }
 
     document.addEventListener('datastar-fetch', onDatastarFetch, true);
-    window.addEventListener('datastar-fetch', onDatastarFetch, true);
 
     document.addEventListener(
       'load',

@@ -10,6 +10,12 @@ describe('formatLabel', () => {
   it('falls back when the name is empty', () => {
     assert.equal(formatLabel('  ', 80), 'element · 80ms');
   });
+
+  it('appends a short source tag so net/dom/ds stay distinguishable', () => {
+    assert.equal(formatLabel('hero.jpg', 820, 'resource'), 'hero.jpg · 820ms · net');
+    assert.equal(formatLabel('#cart', 410, 'datastar'), '#cart · 410ms · ds');
+    assert.equal(formatLabel('#main', 80, 'dom'), '#main · 80ms · dom');
+  });
 });
 
 describe('nameFromUrl', () => {

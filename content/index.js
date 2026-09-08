@@ -17,6 +17,45 @@
     }
   }
 
+  function onPageHotkey(evt) {
+    if (!LT.isToggleHotkey(evt)) return;
+    if (LT.isEditableTarget(evt.target)) return;
+    evt.preventDefault();
+    LT.overlay.toggle();
+  }
+
+  function commandsGetAll(api) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const done = (cmds) => {
+        if (settled) return;
+        settled = true;
+        resolve(cmds);
+      };
+      try {
+        const maybe = api.commands.getAll((cmds) => done(cmds));
+        if (maybe && typeof maybe.then === 'function') maybe.then(done, () => done(null));
+      } catch (err) {
+        done(null);
+      }
+    });
+  }
+
+  function bindPageHotkeyFallback() {
+    const attach = () => {
+      window.addEventListener('keydown', onPageHotkey, true);
+    };
+    if (!ext || !ext.commands || typeof ext.commands.getAll !== 'function') {
+      attach();
+      return;
+    }
+    commandsGetAll(ext)
+      .then((cmds) => {
+        if (LT.shouldBindPageHotkey(cmds, 'toggle-overlay')) attach();
+      })
+      .catch(attach);
+  }
+
   if (ext) {
     loadSettings();
     if (ext.storage && ext.storage.onChanged) {
@@ -35,13 +74,5 @@
     }
   }
 
-  window.addEventListener(
-    'keydown',
-    (evt) => {
-      if (!LT.isToggleHotkey(evt)) return;
-      evt.preventDefault();
-      LT.overlay.toggle();
-    },
-    true
-  );
+  bindPageHotkeyFallback();
 })();

@@ -12,6 +12,7 @@
   let raf = 0;
   let settings = LT.normalizeSettings(LT.DEFAULT_SETTINGS);
   const strips = new Map();
+  let lastToggleAt = NaN;
 
   const STYLE = `
     :host { display: block; }
@@ -187,7 +188,7 @@
         strips.set(el, strip);
       }
       const color = settings.colors[band];
-      const text = LT.formatLabel(rec.name, ms);
+      const text = LT.formatLabel(rec.name, ms, rec.source);
       strip.textContent = text;
       strip.title = text + ' (' + rec.source + ')';
       strip.style.background = color;
@@ -243,6 +244,9 @@
 
   LT.overlay = {
     toggle: function () {
+      const now = performance.now();
+      if (!LT.shouldAcceptToggle(now, lastToggleAt, 80)) return;
+      lastToggleAt = now;
       setEnabled(!enabled);
     },
     applySettings: function (next) {

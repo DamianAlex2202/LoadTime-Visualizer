@@ -33,6 +33,8 @@ Dann [http://127.0.0.1:4173/](http://127.0.0.1:4173/) öffnen und den Hotkey dr�
 - JS-Button fügt nach 280ms ein Element ein
 - Datastar: `@get('/cart')` (~420ms) oder „Events simulieren“ (~410ms) → gelb
 
+Jede Leiste zeigt Quelle: **net** (Resource Timing), **dom** (DOM-Erscheinen), **ds** (Datastar).
+
 Filter **Grün / Gelb / Rot** sitzen in der dunklen Leiste oben links.
 
 ## Optionen
